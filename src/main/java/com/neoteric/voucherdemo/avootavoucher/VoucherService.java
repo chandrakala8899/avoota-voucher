@@ -26,19 +26,6 @@ public class VoucherService {
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
         document.setMargins(20, 30, 10, 30);
-//
-//        Table headerTable = new Table(new float[]{1, 1}).setWidth(UnitValue.createPercentValue(100));
-//        ImageData logo = ImageDataFactory.create("src/main/resources/image/img_1.png");
-//        Image logoImage = new Image(logo).setWidth(30).setHeight(30);
-//        headerTable.addCell(new Cell().add(logoImage).setBorder(Border.NO_BORDER));
-//        headerTable.addCell(new Cell().add(new Paragraph("Vouchered").setFontSize(16).setFontColor(ColorConstants.GREEN)));
-//        // Header Section
-//        headerTable.addCell(new Cell().add(new Paragraph("Booking ID: " + details.getBookingId()).setBold().setFontSize(14)));
-//        document.add(headerTable);
-
-        // Create the header table with two columns
-// Create a table with two columns (logo + text)
-// Create a table with two columns: Logo + "Vouchered"
         Table headerTable = new Table(UnitValue.createPercentArray(new float[]{1, 3})).useAllAvailableWidth();
         headerTable.setBorder(Border.NO_BORDER);
 
@@ -50,7 +37,6 @@ public class VoucherService {
                     .setHeight(20) // Adjust height
                     .setAutoScale(false); // Prevent automatic scaling
 
-            // Add the logo in a cell with no extra space
             Cell logoCell = new Cell()
                     .add(logoImage)
                     .setBorder(Border.NO_BORDER)
@@ -81,23 +67,8 @@ public class VoucherService {
                 .setMargin(0);
 
         headerTable.addCell(voucheredCell);
-
-// Booking ID should be aligned properly below the header
-//        Cell bookingCell = new Cell(1, 2)
-//                .add(new Paragraph("Booking ID: " + details.getBookingId())
-//                        .setBold()
-//                        .setFontSize(12)) // Slightly smaller font
-//                .setBorder(Border.NO_BORDER)
-//                .setPaddingTop(1)
-//                .setPaddingLeft(25) // Align with text
-//                .setMargin(0);
-//
-//        headerTable.addCell(bookingCell);
-
-// Add the table to the document
         document.add(headerTable);
         document.add(new LineSeparator(new SolidLine(1))); // Thin separator line
-// Thin separator line
 
 
         SolidLine line = new SolidLine(0.5f); // Thickness reduced to 0.5
@@ -111,8 +82,6 @@ public class VoucherService {
         SolidLine line1 = new SolidLine(0.5f); // Thickness reduced to 0.5
         LineSeparator separator1= new LineSeparator(line1);
         document.add(separator1);
-        // Booking Details
-        // Define column widths (e.g., 25% for labels, 25% for values, 25% for next label, 25% for next value)
         float[] columnWidths = {2, 2, 2, 2};
         Table table = new Table(UnitValue.createPercentArray(columnWidths)).useAllAvailableWidth();
     BookingDetails booking = new BookingDetails();
@@ -165,39 +134,27 @@ public class VoucherService {
         SolidLine line5 = new SolidLine(0.5f); // Thickness reduced to 0.5
         LineSeparator separator5 = new LineSeparator(line5);
         document.add(separator5);
-// Create a table with 4 columns for cancellation details and set it to full width
-        // Create a table with 3 columns and set it to full width
-        Table cancelTable = new Table(UnitValue.createPercentArray(new float[]{3, 3, 4})).useAllAvailableWidth();
 
-// Add header row with bold text
+        Table cancelTable = new Table(UnitValue.createPercentArray(new float[]{3, 3, 4})).useAllAvailableWidth();
         cancelTable.addCell(new Cell().add(new Paragraph("Cancellation on or After")).setBold().setTextAlignment(TextAlignment.CENTER));
         cancelTable.addCell(new Cell().add(new Paragraph("Cancellation on or Before")).setBold().setTextAlignment(TextAlignment.CENTER));
         cancelTable.addCell(new Cell().add(new Paragraph("Cancellation Charges/Comments")).setBold().setTextAlignment(TextAlignment.CENTER));
 
-// Retrieve cancellation policy
         CancellationPolicy policy = booking.getPolicy();
 
-// Check if policy exists before accessing its properties
         if (policy != null) {
             cancelTable.addCell(new Cell().add(new Paragraph(policy.getCancelAfter() != null ? policy.getCancelAfter() : "N/A")).setTextAlignment(TextAlignment.CENTER));
             cancelTable.addCell(new Cell().add(new Paragraph(policy.getCancelBefore() != null ? policy.getCancelBefore() : "N/A")).setTextAlignment(TextAlignment.CENTER));
             cancelTable.addCell(new Cell().add(new Paragraph(policy.getCancellationCharges() != null ? policy.getCancellationCharges() : "N/A")).setTextAlignment(TextAlignment.CENTER));
-
-            // Add policies dynamically
             if (policy.getPolicies() != null && !policy.getPolicies().isEmpty()) {
                 for (String policyText : policy.getPolicies()) {
                     cancelTable.addCell(new Cell(1, 3).add(new Paragraph("* " + policyText)));
                 }
             }
         } else {
-            // If no policy exists, add placeholders
             cancelTable.addCell(new Cell(1, 3).add(new Paragraph("No cancellation policy available")).setBold().setTextAlignment(TextAlignment.CENTER));
         }
-
-// Add the table to the document
         document.add(cancelTable);
-
-
 
         SolidLine line6 = new SolidLine(0.5f); // Thickness reduced to 0.5
         LineSeparator separator6= new LineSeparator(line6);
