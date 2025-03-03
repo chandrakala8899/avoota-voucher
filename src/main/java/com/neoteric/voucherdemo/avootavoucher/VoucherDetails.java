@@ -5,6 +5,16 @@ import java.util.List;
 public class VoucherDetails {
     private String bookingId;
     private String hotelName;
+    private  double hotelRating;
+
+    public double getHotelRating() {
+        return hotelRating;
+    }
+
+    public void setHotelRating(double hotelRating) {
+        this.hotelRating = hotelRating;
+    }
+
     private String address;
     private String phoneNumber;
     private String lastCancellationDate;

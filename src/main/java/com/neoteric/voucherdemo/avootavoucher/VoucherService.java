@@ -1,4 +1,5 @@
 package com.neoteric.voucherdemo.avootavoucher;
+
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
@@ -30,7 +31,6 @@ public class VoucherService {
         headerTable.setBorder(Border.NO_BORDER);
 
         try {
-            // Load the logo
             ImageData logo = ImageDataFactory.create("src/main/resources/image/img_1.png");
             Image logoImage = new Image(logo)
                     .setWidth(20) // Adjust width
@@ -53,10 +53,8 @@ public class VoucherService {
                     .setPadding(0)
                     .setMargin(0));
         }
-
-// Add "Vouchered" text tightly next to the logo
         Cell voucheredCell = new Cell()
-                .add(new Paragraph("Booking ID: " +details.getBookingId()))
+                .add(new Paragraph("Booking ID: " + details.getBookingId()))
                 .add(new Paragraph("Vouchered")
                         .setFontSize(16)
                         .setBold()
@@ -74,25 +72,25 @@ public class VoucherService {
         SolidLine line = new SolidLine(0.5f); // Thickness reduced to 0.5
         LineSeparator separator = new LineSeparator(line);
         document.add(separator);
-        document.add(new Paragraph(details.getHotelName()).setBold().setFontSize(16));
+        document.add(new Paragraph(details.getHotelName()).add(new Paragraph("    " + String.valueOf(details.getHotelRating()))));
         document.add(new Paragraph(details.getAddress()));
         document.add(new Paragraph("Phone: " + details.getPhoneNumber()));
         document.add(new Paragraph("Last Cancellation Date: " + details.getLastCancellationDate()).setBold().setFontSize(14).setFontColor(new DeviceRgb(0, 0, 128)));
 
         SolidLine line1 = new SolidLine(0.5f); // Thickness reduced to 0.5
-        LineSeparator separator1= new LineSeparator(line1);
+        LineSeparator separator1 = new LineSeparator(line1);
         document.add(separator1);
         float[] columnWidths = {2, 2, 2, 2};
         Table table = new Table(UnitValue.createPercentArray(columnWidths)).useAllAvailableWidth();
-    BookingDetails booking = new BookingDetails();
+        BookingDetails booking = new BookingDetails();
         if (booking != null) {
             table.addCell(new Cell().add(new Paragraph("Check-In:")).setBold().setFontColor(new DeviceRgb(0, 0, 128)));
-            table.addCell(new Cell().add(new Paragraph(booking.getCheckIn() != null ? booking.getCheckIn() : "N/A")).setTextAlignment(TextAlignment.LEFT));
-
             table.addCell(new Cell().add(new Paragraph("Check-Out:")).setBold().setFontColor(new DeviceRgb(0, 0, 128)));
+            table.addCell(new Cell().add(new Paragraph("Total Rooms:")).setBold().setFontColor(new DeviceRgb(0, 0, 128)));
+            table.addCell(new Cell().add(new Paragraph("Total Stay:")).setBold().setFontColor(new DeviceRgb(0, 0, 128)));
+            table.addCell(new Cell().add(new Paragraph(booking.getCheckIn() != null ? booking.getCheckIn() : "N/A")).setTextAlignment(TextAlignment.LEFT));
             table.addCell(new Cell().add(new Paragraph(booking.getCheckOut() != null ? booking.getCheckOut() : "N/A")).setTextAlignment(TextAlignment.LEFT));
 
-            table.addCell(new Cell().add(new Paragraph("Total Rooms:")).setBold().setFontColor(new DeviceRgb(0, 0, 128)));
             Integer totalRooms = booking.getTotalRooms(); // Fetch the total rooms
             String totalRoomsText = (totalRooms != null) ? String.valueOf(totalRooms) : "0"; // Handle null safely
 
@@ -102,8 +100,6 @@ public class VoucherService {
                             .setTextAlignment(TextAlignment.LEFT)
             );
 
-
-            table.addCell(new Cell().add(new Paragraph("Total Stay:")).setBold().setFontColor(new DeviceRgb(0, 0, 128)));
             table.addCell(new Cell().add(new Paragraph((booking.getTotalStay() != null ? booking.getTotalStay() : "0") + " Night(s)")).setTextAlignment(TextAlignment.LEFT));
 
             // Adding table to document
@@ -119,6 +115,7 @@ public class VoucherService {
 
         // Room Details
         RoomDetails room = details.getRoomDetails();
+
         document.add(new Paragraph("Room Type: " + room.getRoomType()));
         document.add(new Paragraph("Bed Type: " + room.getBedType()));
         SolidLine line4 = new SolidLine(0.5f); // Thickness reduced to 0.5
@@ -127,50 +124,60 @@ public class VoucherService {
 
         // Contact Details
         ContactDetails contact = details.getContactDetails();
-        document.add(new Paragraph("Guest Name: " + contact.getGuestName()));
+        document.add(new Paragraph("Special Request(s) " + contact.getGuestName()));
+        SolidLine line7 = new SolidLine(0.5f); // Thickness reduced to 0.5
+        LineSeparator separator7 = new LineSeparator(line7);
+        document.add(separator7);
+        document.add(new Paragraph("Contact Details").setBold().setFontSize(14));
         document.add(new Paragraph("Email: " + contact.getEmail()));
         document.add(new Paragraph("Mobile: " + contact.getMobile()));
 
-        SolidLine line5 = new SolidLine(0.5f); // Thickness reduced to 0.5
-        LineSeparator separator5 = new LineSeparator(line5);
-        document.add(separator5);
-
+        document.add(new Paragraph("Cancellation Policy").setBold().setFontSize(14));
+        // Create the table
         Table cancelTable = new Table(UnitValue.createPercentArray(new float[]{3, 3, 4})).useAllAvailableWidth();
         cancelTable.addCell(new Cell().add(new Paragraph("Cancellation on or After")).setBold().setTextAlignment(TextAlignment.CENTER));
         cancelTable.addCell(new Cell().add(new Paragraph("Cancellation on or Before")).setBold().setTextAlignment(TextAlignment.CENTER));
         cancelTable.addCell(new Cell().add(new Paragraph("Cancellation Charges/Comments")).setBold().setTextAlignment(TextAlignment.CENTER));
 
-        CancellationPolicy policy = booking.getPolicy();
+        CancellationPolicy policy = details.getCancellationPolicy();
 
         if (policy != null) {
             cancelTable.addCell(new Cell().add(new Paragraph(policy.getCancelAfter() != null ? policy.getCancelAfter() : "N/A")).setTextAlignment(TextAlignment.CENTER));
             cancelTable.addCell(new Cell().add(new Paragraph(policy.getCancelBefore() != null ? policy.getCancelBefore() : "N/A")).setTextAlignment(TextAlignment.CENTER));
             cancelTable.addCell(new Cell().add(new Paragraph(policy.getCancellationCharges() != null ? policy.getCancellationCharges() : "N/A")).setTextAlignment(TextAlignment.CENTER));
-            if (policy.getPolicies() != null && !policy.getPolicies().isEmpty()) {
-                for (String policyText : policy.getPolicies()) {
-                    cancelTable.addCell(new Cell(1, 3).add(new Paragraph("* " + policyText)));
-                }
-            }
         } else {
             cancelTable.addCell(new Cell(1, 3).add(new Paragraph("No cancellation policy available")).setBold().setTextAlignment(TextAlignment.CENTER));
         }
+
+// First, add the table
         document.add(cancelTable);
 
+// Then, add the paragraph AFTER the table
+        if (policy != null && policy.getPolicies() != null && !policy.getPolicies().isEmpty()) {
+            for (String policyText : policy.getPolicies()) {
+                document.add(new Paragraph("* " + policyText));
+            }
+        }
+
+
+        System.out.println("Policy: " + policy);
+
+
         SolidLine line6 = new SolidLine(0.5f); // Thickness reduced to 0.5
-        LineSeparator separator6= new LineSeparator(line6);
+        LineSeparator separator6 = new LineSeparator(line6);
         document.add(separator6);
 
 
         // Booking Notes
         document.add(new Paragraph("Booking Notes").setBold().setFontSize(12));
         for (String note : details.getBookingNotes()) {
-            document.add(new Paragraph("• " + note));
+            document.add(new Paragraph("." + note));
         }
 
         // General Terms
         document.add(new Paragraph("General Terms & Conditions").setBold().setFontSize(12));
         for (String term : details.getGeneralTerms()) {
-            document.add(new Paragraph("• " + term));
+            document.add(new Paragraph("•" + term));
         }
 
         // Fare Summary
@@ -197,4 +204,18 @@ public class VoucherService {
         table.addCell(rightCell);
         table.addCell(new Cell(1, 2).add(new LineSeparator(new SolidLine())).setBorder(Border.NO_BORDER));
     }
+
+    private String getStarRating(double rating) {
+        int fullStars = (int) rating;
+        boolean hasHalfStar = (rating - fullStars) >= 0.5;
+        int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+        StringBuilder stars = new StringBuilder();
+        stars.append("★".repeat(fullStars));  // Full stars
+        if (hasHalfStar) stars.append("☆");   // Half star
+        stars.append("☆".repeat(emptyStars)); // Empty stars
+
+        return stars.toString();
+    }
+
 }
